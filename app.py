@@ -112,8 +112,12 @@ def logout():
 @app.route('/')
 @flask_login.login_required
 def home():
+    send_notification_email('hello')
     data = fetch_and_filter_issues()
     return render_template('home.html', data=data)
+
+def send_notification_email(content):
+    print(content)
 
 def fetch_and_filter_issues():
     r_issues = airtable('Issues','GET')
