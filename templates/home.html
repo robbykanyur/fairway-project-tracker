@@ -1,0 +1,22 @@
+<h1>project tracker</h1>
+<table>
+  <tr>
+    <th>position</th>
+    <th>key</th>
+    <th>requestor</th>
+    <th>description</th>
+    <th>status</th>
+    <th>est. completion</th>
+  </tr>
+  {% for issue in data %}
+  <tr>
+    <td>{{ issue["queue"] }}</td>
+    <td>{{ issue["key"] }}</td>
+    <td>{{ issue["requestor_name"] }}</td>
+    <td>{{ issue["public"] }}</td>
+    <td>{{ issue["status_public"] }}</td>
+    <td>{{ issue["estimate"] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<h2>current backlog: {{backlog}} weeks</h2>
