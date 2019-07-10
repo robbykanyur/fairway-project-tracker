@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+  <h1 class="title is-1">Submit a new project</h1>
+  <p class="subtitle">Current backlog: {{ backlog }} weeks</p>
+  <form action="/submit" method="POST">
+      <div class="field">
+        <label class="label">Your name</label>
+        <div class="control">
+          <input class="input" type="text" name="requestor" id="requestor" placeholder="Aaron Anderson" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Description of project</label>
+        <div class="control">
+          <textarea class="textarea" name="description" id="requestor" placeholder="Flyer for an upcoming event"></textarea>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Required completion date (optional)</label>
+        <div class="control">
+          <input class="input" type="text" name="duedate" id="duedate" placeholder="8/15/2019" />
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input class="button is-primary" type="submit" name="submit" />
+        </div>
+      </div>
+  </form>
+</div>
+{% endblock %}

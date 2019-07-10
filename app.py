@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, url_for, flash
+from flask import Flask, request, redirect, render_template, url_for, flash, session
 from dotenv import load_dotenv
 import flask_login
 import os
@@ -43,7 +43,7 @@ def request_loader(request):
     return user
 
 def check_password(password):
-    r_employees = airtable('Employees')
+    r_employees = airtable('Employees','GET')
     password_list = generate_auth_list(r_employees)
 
     for value in password_list:
@@ -68,6 +68,42 @@ def login():
     flash('Unauthorized phone number')
     return redirect(url_for('login'))
 
+@app.route('/submit', methods=['GET', 'POST'])
+@flask_login.login_required
+def submit():
+    if request.method == 'GET':
+        r_variables = airtable('Variables','GET')
+
+        data = fetch_and_filter_issues()
+
+        story_points = 0
+        for issue in data:
+            story_points += issue['points']
+        points_per_week = [variable['fields']['Value'] for variable in r_variables['records'] if variable['fields']['Key'] == 'ticket_story_points'][0]
+        backlog = int(round(story_points / points_per_week, 0))
+
+        return render_template('submit.html', backlog=backlog, data=data)
+
+    record_data = {"fields": {}}
+    record_data["fields"]["Submission Requestor"] = request.form['requestor']
+    record_data["fields"]["Submission Description"] = request.form['description']
+    record_data["fields"]["Submission Due Date"] = request.form['duedate']
+    record_data["fields"]["Status"] = "Submitted"
+    record_data["fields"]["Project Type"] = "User Ticket"
+    record_data["fields"]["Position"] = 9999
+    record_data["fields"]["Public"] = "Under review"
+
+    r = airtable('Issues', "POST", record_data).json()
+    session['submission'] = r
+
+    return redirect(url_for('success'))
+
+@app.route('/success')
+@flask_login.login_required
+def success():
+    key = session['submission']['fields']['Key']
+    return render_template('success.html', key=key)
+
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
@@ -76,53 +112,70 @@ def logout():
 @app.route('/')
 @flask_login.login_required
 def home():
-    r_issues = airtable('Issues')
-    r_employees = airtable('Employees')
-    r_variables = airtable('Variables')
+    data = fetch_and_filter_issues()
+    return render_template('home.html', data=data)
+
+def fetch_and_filter_issues():
+    r_issues = airtable('Issues','GET')
+    r_employees = airtable('Employees','GET')
 
     data = []
     for issue in r_issues["records"]:
         item = {}
+
         if 'Key' in issue['fields']:
             item["key"] = issue["fields"]["Key"]
         else:
             item["key"] = ('')
+
         if 'Status' in issue['fields']:
             item["status"] = issue["fields"]["Status"]
         else:
             item["status"] = ''
+
         if 'Project Type' in issue['fields']:
             item["type"] = issue["fields"]["Project Type"]
         else:
             item["type"] = ''
+
         if 'Public' in issue['fields']:
             item["public"] = issue["fields"]["Public"]
         else:
             item["public"] = ''
+
         if 'Position' in issue['fields']:
             item["position"] = issue["fields"]["Position"]
         else:
             item["position"] = ''
+
         if 'Requestor' in issue['fields']:
             item["requestor_id"] = issue["fields"]["Requestor"][0]
         else:
             item["requestor_id"] = ''
+
         if 'Story Points' in issue['fields']:
             item["points"] = issue["fields"]["Story Points"]
         else:
             item["points"] = 0
+
         if 'Est. Completion Date' in issue['fields']:
             item["estimate"] = issue["fields"]["Est. Completion Date"]
         else:
             item["estimate"] = ''
+
         data.append(item)
 
     data = list(filter(lambda issue: issue['status'] != 'Completed' and issue['status'] != 'Cancelled' and issue['type'] == 'User Ticket', data))
-    data = list(sorted(data, key = lambda issue: issue["position"]))
+    data = list(sorted(data, key = lambda issue: (issue["position"], issue["key"])))
 
     for i in range (0, len(data)):
         data[i]["queue"] = i + 1
-        data[i]["requestor_name"] = [employee['fields']['Name'] for employee in r_employees['records'] if employee['id'] == data[i]["requestor_id"]][0]
+        if data[i]["estimate"] == '':
+            data[i]["estimate"] = 'TBD'
+        if data[i]["requestor_id"] != '':
+            data[i]["requestor_name"] = [employee['fields']['Name'] for employee in r_employees['records'] if employee['id'] == data[i]["requestor_id"]][0]
+        else:
+            data[i]["requestor_name"] = 'New Submission'
         if data[i]["status"] == "Sprint":
             data[i]["status_public"] = "In Progress"
         elif data[i]["status"] == "Waiting":
@@ -132,23 +185,20 @@ def home():
         elif data[i]["status"] == "Staged":
             data[i]["status_public"] = "Received"
 
-    story_points = 0
-    for issue in data:
-        story_points += issue['points']
-    points_per_week = [variable['fields']['Value'] for variable in r_variables['records'] if variable['fields']['Key'] == 'ticket_story_points'][0]
-    backlog = int(round(story_points / points_per_week, 0))
+    return data
 
-    display = {'display': data}
-    return render_template('home.html', data=data, backlog=backlog)
-
-def airtable(table):
+def airtable(table, method, data={}):
     airtable_key = os.getenv('AIRTABLE')
     airtable_headers = {"Authorization": "Bearer %s" % airtable_key}
     airtable_url = 'https://api.airtable.com/v0/appPKruGpsONqlT1g/'
 
     table_url = airtable_url + table
 
-    r = requests.get(url = table_url, headers = airtable_headers).json()
+    if method == 'GET':
+        r = requests.get(url = table_url, headers = airtable_headers).json()
+        return(r)
+
+    r = requests.post(url = table_url, headers = airtable_headers, json = data)
     return(r)
 
 def generate_auth_list(data):
