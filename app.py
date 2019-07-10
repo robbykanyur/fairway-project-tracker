@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, url_for
+from flask import Flask, request, redirect, render_template, url_for, flash
 from dotenv import load_dotenv
 import flask_login
 import os
@@ -37,7 +37,7 @@ def request_loader(request):
     user = User()
     user.id = username
 
-    numeric_password = re.sub('[^0-9]','',request.form['password'])
+    numeric_password = re.sub('[^0-9]','',request.form['phone'])
     user.is_authenticated = check_password(numeric_password)
 
     return user
@@ -55,32 +55,23 @@ def check_password(password):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return '''
-            <form action="login" method="POST">
-                <input type="text" name="username" id="username" placeholder="username" />
-                <input type="password" name="password" id="password" placeholder="password" />
-                <input type="submit" name="submit" />
-            </form>
-        '''
+        return render_template('login.html')
 
     username = request.form['username']
-    numeric_password = re.sub('[^0-9]','',request.form['password'])
+    numeric_password = re.sub('[^0-9]','',request.form['phone'])
     if check_password(numeric_password):
         user = User()
         user.id = username
         flask_login.login_user(user)
         return redirect(url_for('home'))
 
-    return 'Bad login'
+    flash('Unauthorized phone number')
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
-
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return 'Unauthorized'
+    return redirect(url_for('login'))
 
 @app.route('/')
 @flask_login.login_required

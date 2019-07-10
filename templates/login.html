@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+  <h1 class="title is-1">Area 321 Project Tracker</h1>
+  <h2 class="title is-4">Please enter your phone number to authenticate.</h1>
+  <form action="login" method="POST">
+      <input type="text" name="username" id="username" placeholder="username" value="user" style="display:none;"/>
+      <div class="field">
+        <div class="control">
+          <input class="input" type="text" name="phone" id="phone" placeholder="Phone Number" />
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input class="button is-primary" type="submit" name="submit" />
+        </div>
+      </div>
+  </form>
+</div>
+{% endblock %}

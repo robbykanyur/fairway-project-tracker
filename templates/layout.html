@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>321 Project Tracker</title>
+    <link rel="stylesheet" href="/static/css/main.bundle.css">
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <article class="message is-danger">
+          {% for message in messages %}
+          <div class="message-header">
+            <p>{{ message }}</p>
+            <button class="delete" aria-label="delete" onclick="addClass('.message', 'is-hidden')"></button>
+          </div>
+            {% endfor %}
+        </article>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <script type="text/javascript">
+      function addClass(el, className){
+        var el = document.querySelectorAll(el);
+
+        for (i = 0; i < el.length; i++) {
+          if (el.classlist) { el[i].classList.add(className);
+          } else {
+            el[i].className += ' ' + className;
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,22 +1,40 @@
-<h1>project tracker</h1>
-<table>
-  <tr>
-    <th>position</th>
-    <th>key</th>
-    <th>requestor</th>
-    <th>description</th>
-    <th>status</th>
-    <th>est. completion</th>
-  </tr>
-  {% for issue in data %}
-  <tr>
-    <td>{{ issue["queue"] }}</td>
-    <td>{{ issue["key"] }}</td>
-    <td>{{ issue["requestor_name"] }}</td>
-    <td>{{ issue["public"] }}</td>
-    <td>{{ issue["status_public"] }}</td>
-    <td>{{ issue["estimate"] }}</td>
-  </tr>
-  {% endfor %}
-</table>
-<h2>current backlog: {{backlog}} weeks</h2>
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="columns is-vcentered">
+    <div class="column">
+      <h1 class="title is-1">Project Tracker</h1>
+      <p class="subtitle">Fairway Area 321</p>
+    </div>
+    <div class="column is-narrow">
+      <a href="/submit" class="button is-primary">Submit Project</a>
+      <a href="/logout" class="button is-primary">Logout</a>
+    </div>
+  </div>
+  <table class="table is-striped is-fullwidth">
+    <thead>
+      <tr>
+        <th>Pos</th>
+        <th>Key</th>
+        <th>Requestor</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Estimate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for issue in data %}
+      <tr>
+        <td>{{ issue["queue"] }}</td>
+        <td>{{ issue["key"] }}</td>
+        <td>{{ issue["requestor_name"] }}</td>
+        <td>{{ issue["public"] }}</td>
+        <td>{{ issue["status_public"] }}</td>
+        <td>{{ issue["estimate"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
