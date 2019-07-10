@@ -5,6 +5,8 @@ import os
 import requests
 import json
 import re
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 load_dotenv()
 login_manager = flask_login.LoginManager()
@@ -94,6 +96,7 @@ def submit():
     record_data["fields"]["Public"] = "Under review"
 
     r = airtable('Issues', "POST", record_data).json()
+    send_notification_email(r['fields']['Submission Requestor'], r['fields']['Submission Description'], r['fields']['Key'], r['fields']['Submission Due Date'], r['id'])
     session['submission'] = r
 
     return redirect(url_for('success'))
@@ -112,12 +115,18 @@ def logout():
 @app.route('/')
 @flask_login.login_required
 def home():
-    send_notification_email('hello')
     data = fetch_and_filter_issues()
     return render_template('home.html', data=data)
 
-def send_notification_email(content):
-    print(content)
+def send_notification_email(requestor, description, key, duedate, record_id):
+    message = Mail(
+        from_email='noreply@fairway321.com',
+        to_emails='robert.kanyur@fairwaymc.com',
+        subject='New project request from ' + requestor,
+        html_content='A new project has been submitted through the online tool:<br><br>Submitted by: ' + requestor + '<br>Description: ' + description + '<br>Due Date: ' + duedate + '<br><br>This project was assigned the key <strong>' + key + '</strong>.<br><br><a href="https://airtable.com/tblAt6PFHi27t3RoQ/' + record_id + '">View this issue on airtable</a>'
+    )
+    sg = SendGridAPIClient(os.getenv('SENDGRID'))
+    response = sg.send(message)
 
 def fetch_and_filter_issues():
     r_issues = airtable('Issues','GET')
