@@ -127,8 +127,32 @@ def logout():
 @app.route('/')
 @flask_login.login_required
 def home():
-    data = fetch_and_filter_issues()
-    return render_template('home.html', data=data)
+    issues = fetch_and_filter_issues()
+    data = split_tickets(issues)
+
+    return render_template('home.html', active=data[0], inactive=data[1])
+
+def split_tickets(issues):
+    data = []
+    active = []
+    inactive = []
+
+    for issue in issues:
+        if issue["status_public"] == "Waiting":
+            inactive.append(issue)
+        else:
+            active.append(issue)
+
+    for index, item in enumerate(active):
+        item["queue"] = index + 1
+
+    for index, item in enumerate(inactive):
+        item["queue"] = index + 1
+
+    data.append(active)
+    data.append(inactive)
+
+    return data
 
 def send_notification_email(requestor, description, key, duedate, record_id):
     message = Mail(
@@ -194,7 +218,7 @@ def fetch_and_filter_issues():
     data = list(sorted(data, key = lambda issue: (issue["position"], issue["key"])))
 
     for i in range (0, len(data)):
-        data[i]["queue"] = i + 1
+        data[i]["queue"] = 0
         if data[i]["estimate"] == '':
             data[i]["estimate"] = 'TBD'
         if data[i]["requestor_id"] != '':
@@ -205,6 +229,7 @@ def fetch_and_filter_issues():
             data[i]["status_public"] = "In Progress"
         elif data[i]["status"] == "Waiting":
             data[i]["status_public"] = "Waiting"
+            data[i]["estimate"] = 'N/A'
         elif data[i]["status"] == "Submitted":
             data[i]["status_public"] = "Submitted"
         elif data[i]["status"] == "Staged":

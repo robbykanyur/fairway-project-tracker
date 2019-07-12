@@ -12,10 +12,17 @@
       <a href="/logout" id="btn-logout" class="button is-primary" onclick="addClass('#btn-logout', 'is-loading')">Logout</a>
     </div>
   </div>
+</div>
+<br>
+<div class="container">
+  <span class="tag is-success is-medium">Active Tickets</span>
+</div>
+<br>
+<div class="container">
   <table class="table is-striped is-fullwidth">
     <thead>
       <tr>
-        <th>Pos</th>
+        <th></th>
         <th>Key</th>
         <th>Requestor</th>
         <th>Description</th>
@@ -24,7 +31,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for issue in data %}
+      {% for issue in active %}
       <tr>
         <td>{{ issue["queue"] }}</td>
         <td>{{ issue["key"] }}</td>
@@ -37,4 +44,36 @@
     </tbody>
   </table>
 </div>
+<br>
+<div class="container">
+  <span class="tag is-warning is-medium">Inactive Tickets</span>
+</div>
+<br>
+<div class="container">
+  <table class="table is-striped is-fullwidth">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Key</th>
+        <th>Requestor</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Estimate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for issue in inactive %}
+      <tr>
+        <td>{{ issue["queue"] }}</td>
+        <td>{{ issue["key"] }}</td>
+        <td>{{ issue["requestor_name"] }}</td>
+        <td>{{ issue["public"] }}</td>
+        <td>{{ issue["status_public"] }}</td>
+        <td>{{ issue["estimate"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 {% endblock %}
