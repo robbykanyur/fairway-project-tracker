@@ -12,6 +12,7 @@ load_dotenv()
 login_manager = flask_login.LoginManager()
 
 app = Flask(__name__)
+
 login_manager.init_app(app)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -242,3 +243,6 @@ def generate_auth_list(data):
         formatted_numbers.append(re.sub('[^0-9]','',number))
 
     return(formatted_numbers)
+
+if __name__ == "__main__":
+    app.run()

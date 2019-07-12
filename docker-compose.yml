@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  marketing:
+    restart: always
+    image: marketing-web
+    networks:
+      - proxy_default
+    build:
+      context: .
+    volumes:
+      - ./:/home/marketing/src
+    expose:
+      - 5001
+    ports:
+      - '5001:5001'
+    entrypoint: ["./boot.sh"]
+    environment: 
+      - FLASK_APP
+      - FLASK_ENV
+      - SECRET_KEY
+      - AIRTABLE
+      - SENDGRID
+
+networks:
+  proxy_default:
+    external: true
