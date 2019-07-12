@@ -268,7 +268,7 @@ def fetch_and_filter_issues():
 
         data.append(item)
 
-    data = list(filter(lambda issue: issue['status'] != 'Completed' and issue['status'] != 'Cancelled' and issue['type'] == 'User Ticket', data))
+    data = list(filter(lambda issue: issue['status'] != 'Completed' and issue['status'] != 'Cancelled' and issue['status'] != 'On Hold' and issue['type'] == 'User Ticket', data))
     data = list(sorted(data, key = lambda issue: (issue["position"], issue["key"])))
 
     for i in range (0, len(data)):
