@@ -127,10 +127,14 @@ def logout():
 @app.route('/')
 @flask_login.login_required
 def home():
-    issues = fetch_and_filter_issues()
+    payload = fetch_and_filter_issues()
+
+    issues = payload['data']
+    print_jobs = payload['print']
+
     data = split_tickets(issues)
 
-    return render_template('home.html', active=data[0], inactive=data[1])
+    return render_template('home.html', active=data[0], inactive=data[1], print_jobs=print_jobs)
 
 def split_tickets(issues):
     data = []
@@ -165,17 +169,67 @@ def send_notification_email(requestor, description, key, duedate, record_id):
     response = sg.send(message)
 
 def fetch_and_filter_issues():
+    r_print = airtable('Print Jobs', 'GET')
     r_issues = airtable('Issues','GET')
     r_employees = airtable('Employees','GET')
 
+    payload = {}
     data = []
+
+    all_print_jobs = []
+    active_print_jobs = []
+
+    for issue in r_print["records"]:
+        print(issue)
+        item = {}
+
+        if 'Key' in issue['fields']:
+            item["key"] = issue["fields"]["Key"]
+        else:
+            item["key"] = ''
+
+        if 'Name' in issue['fields']:
+            item["description"] = issue["fields"]["Name"]
+        else:
+            item["description"] = ''
+
+        if 'Requestor' in issue['fields']:
+            item["requestor_id"] = issue["fields"]["Requestor"]
+        else:
+            item["requestor"] = ''
+
+        if 'Public Status' in issue['fields']:
+            item["status"] = issue["fields"]["Public Status"]
+        else:
+            item["status"] = ''
+
+        if 'Expected Completion' in issue['fields']:
+            item["completion"] = issue["fields"]["Expected Completion"]
+        else:
+            item["completion"] = ''
+
+        if 'Delivery Instructions' in issue['fields']:
+            item["delivery"] = issue["fields"]["Delivery Instructions"]
+        else:
+            item["delivery"] = ''
+
+        all_print_jobs.append(item)
+
+    for issue in all_print_jobs:
+        status = issue['status']
+        if status == 'In Production' or status == 'Ready for Pickup' or status == 'Delivery Scheduled':
+            active_print_jobs.append(issue)
+
+    for index, issue in enumerate(active_print_jobs):
+        issue['queue'] = index + 1
+
     for issue in r_issues["records"]:
         item = {}
 
         if 'Key' in issue['fields']:
             item["key"] = issue["fields"]["Key"]
         else:
-            item["key"] = ('')
+            item["key"] = ''
 
         if 'Status' in issue['fields']:
             item["status"] = issue["fields"]["Status"]
@@ -235,7 +289,10 @@ def fetch_and_filter_issues():
         elif data[i]["status"] == "Staged":
             data[i]["status_public"] = "Received"
 
-    return data
+    payload["data"] = data
+    payload["print"] = active_print_jobs
+
+    return payload
 
 def airtable(table, method, data={}):
     airtable_key = os.getenv('AIRTABLE')

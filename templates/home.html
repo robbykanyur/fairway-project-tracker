@@ -75,5 +75,36 @@
     </tbody>
   </table>
 </div>
+<br>
+<div class="container">
+  <span class="tag is-primary is-medium">Print Jobs</span>
+</div>
+<br>
+<div class="container">
+  <table class="table is-striped is-fullwidth">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Key</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Est. Completion</th>
+        <th>Delivery</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for issue in print_jobs %}
+      <tr>
+        <td>{{ issue["queue"] }}</td>
+        <td>{{ issue["key"] }}</td>
+        <td>{{ issue["description"] }}</td>
+        <td>{{ issue["status"] }}</td>
+        <td>{{ issue["completion"] }}</td>
+        <td>{{ issue["delivery"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}
