@@ -1,2 +1,40 @@
 @charset "utf-8";
+
+@font-face {
+    font-family: 'Circular';
+    src: url('/static/fonts/4155e2d2527e69b4f77071acd5180c4d.woff2') format('woff2'),
+        url('/static/fonts/4155e2d2527e69b4f77071acd5180c4d.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url('/static/fonts/ad227b8430dbe0bbfff806e6bc830b1d.woff2') format('woff2'),
+        url('/static/fonts/ad227b8430dbe0bbfff806e6bc830b1d.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url('/static/fonts/2228b0ee2a46b88d39cf6b5adb831778.woff2') format('woff2'),
+        url('/static/fonts/2228b0ee2a46b88d39cf6b5adb831778.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url('/static/fonts/d4fc5906a11e203e8f196f7fd8fef09c.woff2') format('woff2'),
+        url('/static/fonts/d4fc5906a11e203e8f196f7fd8fef09c.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+$family-sans-serif: 'Circular', sans-serif;
+$cyan: #58b3df;
+$primary: $cyan;
+
 @import "~bulma/bulma";
+

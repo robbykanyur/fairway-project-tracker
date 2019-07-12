@@ -2,32 +2,60 @@
 
 {% block content %}
 <div class="container">
-  <h1 class="title is-1">Submit a new project</h1>
-  <p class="subtitle">Current backlog: {{ backlog }} weeks</p>
-  <form action="/submit" method="POST">
-      <div class="field">
-        <label class="label">Your name</label>
-        <div class="control">
-          <input class="input" type="text" name="requestor" id="requestor" placeholder="Aaron Anderson" />
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Description of project</label>
-        <div class="control">
-          <textarea class="textarea" name="description" id="requestor" placeholder="Flyer for an upcoming event"></textarea>
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Required completion date (optional)</label>
-        <div class="control">
-          <input class="input" type="text" name="duedate" id="duedate" placeholder="8/15/2019" />
-        </div>
-      </div>
-      <div class="field">
-        <div class="control">
-          <input class="button is-primary" type="submit" name="submit" />
-        </div>
-      </div>
-  </form>
+  <div class="columns is-vcentered">
+    <div class="column">
+      <h1 class="title is-1">Submit a new project</h1>
+      <p class="subtitle">Current backlog: {{ backlog }} week{{ backlog|pluralize }}</p>
+    </div>
+    <div class="column is-narrow">
+      <a href="/" id="btn-view" class="button is-primary" onclick="addClass('#btn-view', 'is-loading')">View Queue</a>
+      <a href="/logout" id="btn-logout" class="button is-primary" onclick="addClass('#btn-logout', 'is-loading')">Logout</a>
+    </div>
+  </div>
 </div>
+<br>
+<div class="container">
+  <div class="columns">
+    <div class="column is-6">
+      <form action="/submit" method="POST" onKeyPress="return checkSubmit(event)">
+        <div class="field">
+          <label class="label">Your name</label>
+          <div class="control has-icons-left">
+            <input class="input" type="text" name="requestor" id="requestor" placeholder="Aaron Anderson" />
+            <span class="icon is-small is-left">
+              <i class="fas fa-user"></i>
+            </span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Description of project</label>
+          <div class="control">
+            <textarea class="textarea" name="description" id="requestor" placeholder="Flyer for an upcoming event"></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Required completion date (optional)</label>
+          <div class="control has-icons-left">
+            <input class="input" type="text" name="duedate" id="duedate" placeholder="01/01/2019" />
+            <span class="icon is-small is-left">
+              <i class="fas fa-calendar-alt"></i>
+          </div>
+        </div>
+        <div class="field">
+          <div class="control">
+            <a class="button is-primary" id="btn-submit" type="submit" name="submit" onclick="addClass('#btn-submit', 'is-loading'); document.forms['submission'].submit();">Submit</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  function checkSubmit(e){
+    if(e && e.keyCode == 13) {
+      addClass('#btn-submit', 'is-loading');
+      document.forms[0].submit();
+    }
+  }
+</script>
 {% endblock %}
