@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, render_template, url_for, flash, session
+from flask_debugtoolbar import DebugToolbarExtension
 from dotenv import load_dotenv
 from datetime import datetime
 from dateutil import tz
@@ -14,10 +15,9 @@ load_dotenv()
 login_manager = flask_login.LoginManager()
 
 app = Flask(__name__)
-
 login_manager.init_app(app)
-
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+toolbar = DebugToolbarExtension(app)
 
 users = {'user'}
 
