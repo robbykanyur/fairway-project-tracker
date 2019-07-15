@@ -88,7 +88,7 @@ def submit():
     if request.method == 'GET':
         r_variables = airtable('Variables','GET')
 
-        data = fetch_and_filter_issues()
+        data = fetch_and_filter_issues()["data"]
 
         story_points = 0
         for issue in data:
@@ -134,16 +134,19 @@ def home():
 
     data = split_tickets(issues)
 
-    return render_template('home.html', active=data[0], inactive=data[1], print_jobs=print_jobs)
+    return render_template('home.html', active=data[0], inactive=data[1], blocked=data[2], print_jobs=print_jobs)
 
 def split_tickets(issues):
     data = []
     active = []
     inactive = []
+    blocked = []
 
     for issue in issues:
         if issue["status_public"] == "Waiting":
             inactive.append(issue)
+        elif issue["status_public"] == "Blocked":
+            blocked.append(issue)
         else:
             active.append(issue)
 
@@ -153,8 +156,12 @@ def split_tickets(issues):
     for index, item in enumerate(inactive):
         item["queue"] = index + 1
 
+    for index, item in enumerate(blocked):
+        item["queue"] = index + 1
+
     data.append(active)
     data.append(inactive)
+    data.append(blocked)
 
     return data
 
@@ -179,14 +186,22 @@ def fetch_and_filter_issues():
     all_print_jobs = []
     active_print_jobs = []
 
+    for issue in r_issues["records"]:
+        if 'Public' not in issue['fields']:
+            issue['fields']['Public'] = 'Internal Project'
+
     for issue in r_print["records"]:
-        print(issue)
         item = {}
 
         if 'Key' in issue['fields']:
             item["key"] = issue["fields"]["Key"]
         else:
             item["key"] = ''
+
+        if 'Last Modified' in issue['fields']:
+            item["modified"] = issue["fields"]["Last Modified"]
+        else:
+            item['modified'] = ''
 
         if 'Name' in issue['fields']:
             item["description"] = issue["fields"]["Name"]
@@ -231,6 +246,21 @@ def fetch_and_filter_issues():
         else:
             item["key"] = ''
 
+        if 'Id' in issue['fields']:
+            item["id"] = issue["fields"]['Id']
+        else:
+            item['id'] = ''
+
+        if 'Wait Reason' in issue['fields']:
+            item["wait_reason"] = issue["fields"]["Wait Reason"]
+        else:
+            item["wait_reason"] = ''
+
+        if 'Blocked By' in issue['fields']:
+            item["blocked_by_id"] = issue["fields"]["Blocked By"]
+        else:
+            item["blocked_by_id"] = ''
+
         if 'Status' in issue['fields']:
             item["status"] = issue["fields"]["Status"]
         else:
@@ -273,6 +303,9 @@ def fetch_and_filter_issues():
 
     for i in range (0, len(data)):
         data[i]["queue"] = 0
+        if data[i]["blocked_by_id"] != '':
+            data[i]["blocked_by"] = [issue['fields']['Public'] for issue in r_issues['records'] if issue['id'] == data[i]["blocked_by_id"][0]][0]
+            data[i]["estimate"] = 'TBD'
         if data[i]["estimate"] == '':
             data[i]["estimate"] = 'TBD'
         if data[i]["requestor_id"] != '':
@@ -288,6 +321,10 @@ def fetch_and_filter_issues():
             data[i]["status_public"] = "Submitted"
         elif data[i]["status"] == "Staged":
             data[i]["status_public"] = "Received"
+        elif data[i]["status"] == "Blocked":
+            data[i]["status_public"] = "Blocked"
+        else:
+            data[i]["status_public"] = ""
 
     payload["data"] = data
     payload["print"] = active_print_jobs

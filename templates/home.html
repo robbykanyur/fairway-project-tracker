@@ -45,8 +45,9 @@
   </table>
 </div>
 <br>
+<br>
 <div class="container">
-  <span class="tag is-warning is-medium">Inactive Tickets</span>
+  <span class="tag is-warning is-medium">Waiting Tickets</span>
 </div>
 <br>
 <div class="container">
@@ -57,7 +58,7 @@
         <th>Key</th>
         <th>Requestor</th>
         <th>Description</th>
-        <th>Status</th>
+        <th>Reason</th>
         <th>Estimate</th>
       </tr>
     </thead>
@@ -68,13 +69,46 @@
         <td>{{ issue["key"] }}</td>
         <td>{{ issue["requestor_name"] }}</td>
         <td>{{ issue["public"] }}</td>
-        <td>{{ issue["status_public"] }}</td>
+        <td>{{ issue["wait_reason"] }}</td>
         <td>{{ issue["estimate"] }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+<br>
+<br>
+<div class="container">
+  <span class="tag is-danger is-medium">Blocked Tickets</span>
+</div>
+<br>
+<div class="container">
+  <table class="table is-striped is-fullwidth">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Key</th>
+        <th>Requestor</th>
+        <th>Description</th>
+        <th>Blocked By</th>
+        <th>Estimate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for issue in blocked %}
+      <tr>
+        <td>{{ issue["queue"] }}</td>
+        <td>{{ issue["key"] }}</td>
+        <td>{{ issue["requestor_name"] }}</td>
+        <td>{{ issue["public"] }}</td>
+        <td>{{ issue["blocked_by"] }}</td>
+        <td>{{ issue["estimate"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<br>
 <br>
 <div class="container">
   <span class="tag is-primary is-medium">Print Jobs</span>
