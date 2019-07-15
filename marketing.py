@@ -198,7 +198,7 @@ def fetch_and_filter_issues():
             last_modified = issue['fields']['Last Modified']
 
     from_zone = tz.tzutc()
-    to_zone = tz.tzlocal()
+    to_zone = tz.gettz('America/Phoenix')
 
     utc = datetime.strptime(last_modified, '%Y-%m-%dT%H:%M:%S.%fZ')
     utc = utc.replace(tzinfo=from_zone)
