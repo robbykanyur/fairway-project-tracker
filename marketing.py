@@ -88,17 +88,10 @@ def login():
 @flask_login.login_required
 def submit():
     if request.method == 'GET':
-        r_variables = airtable('Variables','GET')
-
         data = fetch_and_filter_issues()["data"]
+        backlog = calculate_backlog(data)
 
-        story_points = 0
-        for issue in data:
-            story_points += issue['points']
-        points_per_week = [variable['fields']['Value'] for variable in r_variables['records'] if variable['fields']['Key'] == 'ticket_story_points'][0]
-        backlog = int(round(story_points / points_per_week, 0))
-
-        return render_template('submit.html', backlog=backlog, data=data)
+        return render_template('submit.html', backlog=session['backlog'], data=data)
 
     record_data = {"fields": {}}
     record_data["fields"]["Submission Requestor"] = request.form['requestor']
@@ -115,11 +108,20 @@ def submit():
 
     return redirect(url_for('success'))
 
+def calculate_backlog(data):
+    r_variables = airtable('Variables','GET')
+    story_points = 0
+    for issue in data:
+        story_points += issue['points']
+    points_per_week = [variable['fields']['Value'] for variable in r_variables['records'] if variable['fields']['Key'] == 'ticket_story_points'][0]
+    session['backlog'] = int(round(story_points / points_per_week, 0))
+    return True
+
 @app.route('/success')
 @flask_login.login_required
 def success():
     key = session['submission']['fields']['Key']
-    return render_template('success.html', key=key)
+    return render_template('success.html', key=key, backlog=session['backlog'])
 
 @app.route('/logout')
 def logout():
@@ -134,10 +136,11 @@ def home():
     issues = payload['data']
     print_jobs = payload['print']
     modified = payload['modified']
+    backlog = calculate_backlog(issues)
 
     data = split_tickets(issues)
 
-    return render_template('home.html', active=data[0], inactive=data[1], blocked=data[2], print_jobs=print_jobs, mod_date=modified["date"], mod_time=modified['time'])
+    return render_template('home.html', backlog=session['backlog'], active=data[0], inactive=data[1], blocked=data[2], print_jobs=print_jobs, mod_date=modified["date"], mod_time=modified['time'])
 
 def split_tickets(issues):
     data = []

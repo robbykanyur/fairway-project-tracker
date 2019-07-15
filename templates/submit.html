@@ -5,7 +5,9 @@
   <div class="columns is-vcentered">
     <div class="column">
       <h1 class="title is-1">Submit a new project</h1>
-      <p class="subtitle">Current backlog: {{ backlog }} week{{ backlog|pluralize }}</p>
+    </div>
+    <div class="column is-narrow">
+      <span class="tag is-light">Backlog: {{ backlog }} week{{ backlog|pluralize }}</span>
     </div>
     <div class="column is-narrow">
       <a href="/" id="btn-view" class="button is-primary" onclick="addClass('#btn-view', 'is-loading')">View Queue</a>

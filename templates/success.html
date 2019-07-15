@@ -2,10 +2,23 @@
 
 {% block content %}
 <div class="container">
+  <div class="columns is-vcentered">
+    <div class="column">
+        <h1 class="title is-1">Success</h1>
+    </div>
+    <div class="column is-narrow">
+      <span class="tag is-light">Backlog: {{ backlog }} week{{ backlog|pluralize }}</span>
+    </div>
+    <div class="column is-narrow">
+      <a href="/" id="btn-view" class="button is-primary" onclick="addClass('#btn-view', 'is-loading')">View Queue</a>
+      <a href="/logout" id="btn-logout" class="button is-primary" onclick="addClass('#btn-logout', 'is-loading')">Logout</a>
+    </div>
+  </div>
+</div>
+<div class="container">
   <div class="columns">
     <div class="column is-8">
       <div class="content">
-        <h1 class="title is-1">Success</h1>
         <p>Your project has been submitted successfully. Your issue key is <strong>{{ key }}</strong>. If you have file attachments or additional instructions, please email <strong>robert.kanyur@fairwaymc.com</strong> and reference this key.</strong></p>
         <p><a href="/submit" id="btn-submit" class="button is-primary" onclick="addClass('#btn-submit', 'is-loading')">Submit Another Ticket</a>
         <a href="/" id="btn-view" class="button is-primary" onclick="addClass('#btn-view', 'is-loading')">View Queue</a>
