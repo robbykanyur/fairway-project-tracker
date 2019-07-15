@@ -1,5 +1,7 @@
 from flask import Flask, request, redirect, render_template, url_for, flash, session
 from dotenv import load_dotenv
+from datetime import datetime
+from dateutil import tz
 import flask_login
 import os
 import requests
@@ -131,10 +133,11 @@ def home():
 
     issues = payload['data']
     print_jobs = payload['print']
+    modified = payload['modified']
 
     data = split_tickets(issues)
 
-    return render_template('home.html', active=data[0], inactive=data[1], blocked=data[2], print_jobs=print_jobs)
+    return render_template('home.html', active=data[0], inactive=data[1], blocked=data[2], print_jobs=print_jobs, mod_date=modified["date"], mod_time=modified['time'])
 
 def split_tickets(issues):
     data = []
@@ -186,9 +189,20 @@ def fetch_and_filter_issues():
     all_print_jobs = []
     active_print_jobs = []
 
-    for issue in r_issues["records"]:
-        if 'Public' not in issue['fields']:
-            issue['fields']['Public'] = 'Internal Project'
+    last_modified = r_issues['records'][0]['fields']['Last Modified']
+    for issue in r_issues['records']:
+        if issue['fields']['Last Modified'] > last_modified:
+            last_modified = issue['fields']['Last Modified']
+
+    from_zone = tz.tzutc()
+    to_zone = tz.tzlocal()
+
+    utc = datetime.strptime(last_modified, '%Y-%m-%dT%H:%M:%S.%fZ')
+    utc = utc.replace(tzinfo=from_zone)
+
+    payload["modified"] = {}
+    payload["modified"]["date"] = utc.astimezone(to_zone).strftime('%m-%d-%Y')
+    payload["modified"]["time"] = utc.astimezone(to_zone).strftime('%I:%M%p').lower()
 
     for issue in r_print["records"]:
         item = {}
@@ -197,11 +211,6 @@ def fetch_and_filter_issues():
             item["key"] = issue["fields"]["Key"]
         else:
             item["key"] = ''
-
-        if 'Last Modified' in issue['fields']:
-            item["modified"] = issue["fields"]["Last Modified"]
-        else:
-            item['modified'] = ''
 
         if 'Name' in issue['fields']:
             item["description"] = issue["fields"]["Name"]
@@ -240,6 +249,14 @@ def fetch_and_filter_issues():
 
     for issue in r_issues["records"]:
         item = {}
+
+        if 'Public' not in issue['fields']:
+            issue['fields']['Public'] = 'Internal Project'
+
+        if 'Last Modified' in issue['fields']:
+            item["modified"] = issue["fields"]["Last Modified"]
+        else:
+            item['modified'] = ''
 
         if 'Key' in issue['fields']:
             item["key"] = issue["fields"]["Key"]
