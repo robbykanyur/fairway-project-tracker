@@ -325,7 +325,7 @@ def fetch_and_filter_issues():
         data[i]["queue"] = 0
         if data[i]["blocked_by_id"] != '':
             data[i]["blocked_by"] = [issue['fields']['Public'] for issue in r_issues['records'] if issue['id'] == data[i]["blocked_by_id"][0]][0]
-            data[i]["estimate"] = 'TBD'
+            data[i]["estimate"] = 'N/A'
         if data[i]["estimate"] == '':
             data[i]["estimate"] = 'TBD'
         if data[i]["requestor_id"] != '':
